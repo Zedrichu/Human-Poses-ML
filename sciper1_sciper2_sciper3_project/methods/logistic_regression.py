@@ -16,12 +16,8 @@ class LogisticRegression(object):
             Initialize the task_kind (see dummy_methods.py)
             and call set_arguments function of this class.
         """
-        
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
+        self.task_kind = 'classification'
+        self.set_arguments(*args, **kwargs)
 
     def set_arguments(self, *args, **kwargs):
         """
@@ -31,12 +27,27 @@ class LogisticRegression(object):
             You can either pass these as args or kwargs.
         """
         
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-       
+        if "lr" in kwargs and "max_iters" in kwargs:
+            self.lr = kwargs["lr"]
+            self.max_iters = kwargs["max_iters"]
+        elif len(args) > 0:
+            self.lr = args[0]
+            self.max_iters = args[1]
+        else: 
+            self.lr = 1
+            self.max_iters = 1
+
+    def sigmoid(t):
+        """ Sigmoid function
+        
+        Args:
+            t (np.array): Input data of shape (N, )
+            
+        Returns:
+            res (np.array): Probabilites of shape (N, ), where each value is in [0, 1].
+        """
+        res = 1 / (1 + np.exp(-t))
+        return res
 
     def fit(self, training_data, training_labels):
         """
@@ -48,13 +59,6 @@ class LogisticRegression(object):
                 pred_labels (np.array): target of shape (N,regression_target_size)
         """
         
-        
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-
         return pred_labels
 
     def predict(self, test_data):

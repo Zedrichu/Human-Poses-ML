@@ -15,11 +15,8 @@ class LinearRegression(object):
             Initialize the task_kind (see dummy_methods.py)
             and call set_arguments function of this class.
         """
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
+        self.task_kind = 'regression'
+        self.set_arguments(*args, **args)
 
     def set_arguments(self, *args, **kwargs):
         """
@@ -28,13 +25,12 @@ class LinearRegression(object):
 
             You can either pass these as args or kwargs.
         """
-
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-    
+        if "lmda" in kwargs:
+            self.lmda = kwargs["lmda"]
+        elif len(args) > 0:
+            self.lmda = args[0]
+        else:
+            self.lmda = 1
 
     def fit(self, training_data, training_labels):
         """
@@ -45,13 +41,8 @@ class LinearRegression(object):
             Returns:
                 pred_regression_targets (np.array): predicted target of shape (N,regression_target_size)
         """
-        
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-
+        self.w = np.linalg.inv(X_train.T @ X_train) @ (X_train.T) @ y_train
+        pred_regression_targets = training_data @ self.w
         return pred_regression_targets
 
     def predict(self, test_data):
@@ -64,10 +55,5 @@ class LinearRegression(object):
                 pred_regression_targets (np.array): predicted targets of shape (N,regression_target_size)
         """   
 
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-
+        pred_regression_targets = test_data @ self.w
         return pred_regression_targets

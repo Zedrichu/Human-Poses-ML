@@ -12,11 +12,8 @@ class KNN(object):
             Initialize the task_kind (see dummy_methods.py)
             and call set_arguments function of this class.
         """
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
+        self.task_kind = 'classification'
+        self.set_arguments(*args, **kwargs)
 
     def set_arguments(self, *args, **kwargs):
         """
@@ -24,13 +21,13 @@ class KNN(object):
             The KNN class should have a variable defining the number of neighbours (k).
             You can either pass this as an arg or a kwarg.
         """
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-
-    
+        
+        if "k" in kwargs:
+            self.k = kwargs["k"]
+        elif len(args) > 0:
+            self.k = args[0]
+        else:
+            self.k = 1    
 
     def fit(self, training_data, training_labels):
         """
@@ -46,13 +43,9 @@ class KNN(object):
             Returns:
                 pred_labels (np.array): labels of shape (N,)
         """
-
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-        return pred_labels
+        self.training_data = training_data
+        self.training_labels = training_labels
+        # return pred_labels
                                
     def predict(self, test_data):
         """
@@ -62,10 +55,12 @@ class KNN(object):
                 test_data (np.array): test data of shape (N,D)
             Returns:
                 test_labels (np.array): labels of shape (N,)
-        """      
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-        return test_labels
+        """ 
+        # distance = np.norm() 
+        # for data in test_data:
+        #     distance = np.linalg.norm()
+        #     sorted = 
+        # neighbours = self.training_data - test_data
+
+        #return nearest neigbours most used label
+        # return test_labels

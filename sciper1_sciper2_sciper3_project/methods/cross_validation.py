@@ -14,12 +14,12 @@ def splitting_fn(data, labels, indices, fold_size, fold):
         Returns:
             train_data, train_label, val_data, val_label (np. arrays): split training and validation sets
     """
-                
-    ##
-    ###
-    #### YOUR CODE HERE! 
-    ###
-    ##
+    ##how to use fold? #TODO
+    
+    train_data = data[indices[0:fold_size], :]
+    train_label = labels[indices[0:fold_size]]
+    val_data = data[indices[0:fold_size], :]
+    val_label = labels[indices[0:fold_size]]
 
     return train_data, train_label, val_data, val_label
 
@@ -61,8 +61,7 @@ def cross_validation(method_obj=None, search_arg_name=None, search_arg_vals=[], 
 
         acc_list2 = []
         for fold in range(k_fold):
-            
-                    
+            print("Whatever")
             ##
             ###
             #### YOUR CODE HERE! 
@@ -81,8 +80,6 @@ def cross_validation(method_obj=None, search_arg_name=None, search_arg_vals=[], 
     #### YOUR CODE HERE! 
     ###
     ##
-
-
     return best_hyperparam, best_acc
 
         
