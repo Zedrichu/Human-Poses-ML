@@ -49,7 +49,34 @@ class LogisticRegression(object):
         res = 1 / (1 + np.exp(-t))
         return res
 
-    def fit(self, training_data, training_labels):
+    def classify(self, data, w):
+        """
+        Classifies data into 2 classes.
+
+        Args:
+            data (np.array): Dataset of shape (N, D)
+
+        Returns:
+            (np.array): Predictions of labels (N, )
+        """
+        pred = self.sigmoid(data @ w)
+        return int(pred[pred >= 0.5])
+
+    def accuracy_fn(labels_true, labels_pred):
+        """
+        Computes accuracy of current model parameters.
+
+        Args:
+            labels_true (np.array): True labels of shape (N,)
+            labels_pred (np.array): Predicted labels of shape (N,)
+        
+        Returns:
+            acc (float): Accuracy [0..1]
+        """
+        acc = np.sum(labels_true == labels_pred) / labels_pred.shape[0] 
+        return acc
+
+    def fit(self, training_data, training_labels, max_iters=10, lr=0.001):
         """
             Trains the model, returns predicted labels for training data.
             Arguments:
@@ -58,8 +85,24 @@ class LogisticRegression(object):
             Returns:
                 pred_labels (np.array): target of shape (N,regression_target_size)
         """
-        
+        w = np.random.normal(0.0, 0.1, training_data.shape[0])
+        for _ in range(max_iters):
+            # Compute the updated gradient
+            grad = gradient(training_data, training_labels, w)
+            # Update the weights
+            w -= lr * grad
+
+            predictions = self.classify(training_data, w)
+            #check accurancy and break if 100%
+            if self.accuracy_fn(predictions, training_labels) == 1:
+                break
+        self.W = w
+        pred_labels = self.classify(training_data, w)
         return pred_labels
+
+    def gradient(self, W, training_data, traning_labels):
+        grad = traning_data.T @ (self.sigmoid(training_data @ W) - training_labels)
+        return grad
 
     def predict(self, test_data):
         """
@@ -70,10 +113,5 @@ class LogisticRegression(object):
             Returns:
                 test_labels (np.array): labels of shape (N,)
         """   
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-
+        pred_labels = classify(test_data, self.W)
         return pred_labels
