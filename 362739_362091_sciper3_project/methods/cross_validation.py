@@ -14,12 +14,12 @@ def splitting_fn(data, labels, indices, fold_size, fold):
         Returns:
             train_data, train_label, val_data, val_label (np. arrays): split training and validation sets
     """
-    ##how to use fold? #TODO
+    trainslice = np.setdiff1d(np.arange(data.shape[0]), np.arange(fold_size*fold,fold_size*(fold+1)))
     
-    train_data = data[indices[0:fold_size], :]
-    train_label = labels[indices[0:fold_size]]
-    val_data = data[indices[0:fold_size], :]
-    val_label = labels[indices[0:fold_size]]
+    train_data = data[indices[trainslice], :]
+    train_label = labels[indices[trainslice]]
+    val_data = data[indices[fold * fold_size : (fold+1) * fold_size], :]
+    val_label = labels[indices[fold * fold_size : (fold+1) * fold_size]]
 
     return train_data, train_label, val_data, val_label
 
@@ -61,25 +61,17 @@ def cross_validation(method_obj=None, search_arg_name=None, search_arg_vals=[], 
 
         acc_list2 = []
         for fold in range(k_fold):
-            print("Whatever")
-            ##
-            ###
-            #### YOUR CODE HERE! 
-            ###
-            ##
+            train_data, train_label, val_data, val_label = splitting_fn(data, labels, indices, fold_size, fold) 
+            method_obj.fit(train_data, train_label)
+            predictions = method_obj.predict(val_data)
+            acc_list2.append(metric(predictions, val_label))
         
-         
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
+        acc_list1.append(np.mean(acc_list2))
      
-    ##
-    ###
-    #### YOUR CODE HERE! 
-    ###
-    ##
+    best_index = np.argmax(acc_list1)
+    best_hyperparam = search_arg_vals[best_index]
+    best_acc = acc_list1[best_index]
+
     return best_hyperparam, best_acc
 
         

@@ -28,7 +28,53 @@ class KNN(object):
             self.k = args[0]
         else:
             self.k = 1    
+        
+    def euclidean_dist(sample, training_samples):
+        """
+            Function to compute the Euclidean distance between a single sample
+            vector and all training samples.
+            
+            Inputs:
+                sample: shape (D,)
+                training_samples: shape (NxD) 
+            Outputs:
+                return distance vector of length N
+        """
+        return np.sqrt(np.sum((sample-training_samples)**2, axis = 1))
 
+    def find_k_nearest_neighbors(k, distances):
+        """
+            Find the indices of the k smallest distances from the list
+        """
+        indices = np.argsort(distances)[0:k]
+        return indices
+
+    def predict_label(neighbor_labels):
+        """
+            Return the most frequent label in the input
+        """
+        label = np.argmax(np.bincount(neighbor_labels))
+        return label
+
+    # def choose_random_sample(data):
+    #     """
+    #         Randomly chose a single datapoint from given matrix
+
+    #         Input:
+    #             data: shape (NxD)
+    #         Output:
+    #             return a randomly chosen index of length (D,)
+    #     """
+    #     index = np.random.randint(data.shape[0])
+    #     return index
+
+    def kNN_sample(self, sample):
+        distances = euclidean_dist(sample, self.training_data)
+        indices = find_k_nearest_neighbors(self.k, distances)
+        neighbor_labels = self.training_labels[indices]
+        best_label = predict_label(neighbor_labels)
+        return best_label
+        
     def fit(self, training_data, training_labels):
         """
             Trains the model, returns predicted labels for training data.
@@ -45,7 +91,9 @@ class KNN(object):
         """
         self.training_data = training_data
         self.training_labels = training_labels
-        # return pred_labels
+        
+        pred_labels = [self.kNN_sample(x) for x in training_data]        
+        return pred_labels
                                
     def predict(self, test_data):
         """
@@ -55,12 +103,6 @@ class KNN(object):
                 test_data (np.array): test data of shape (N,D)
             Returns:
                 test_labels (np.array): labels of shape (N,)
-        """ 
-        # distance = np.norm() 
-        # for data in test_data:
-        #     distance = np.linalg.norm()
-        #     sorted = 
-        # neighbours = self.training_data - test_data
-
-        #return nearest neigbours most used label
-        # return test_labels
+        """
+        test_labels = [self.kNN_sample(x) for x in test_data]
+        return test_labels

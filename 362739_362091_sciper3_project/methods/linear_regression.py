@@ -16,7 +16,7 @@ class LinearRegression(object):
             and call set_arguments function of this class.
         """
         self.task_kind = 'regression'
-        self.set_arguments(*args, **args)
+        self.set_arguments(*args, **kwargs)
 
     def set_arguments(self, *args, **kwargs):
         """
@@ -41,7 +41,7 @@ class LinearRegression(object):
             Returns:
                 pred_regression_targets (np.array): predicted target of shape (N,regression_target_size)
         """
-        self.w = np.linalg.inv(X_train.T @ X_train) @ (X_train.T) @ y_train
+        self.w = np.linalg.inv(training_data.T @ training_data + self.lmda * np.eye(training_data.shape[1])) @ (training_data.T) @ training_labels
         pred_regression_targets = training_data @ self.w
         return pred_regression_targets
 

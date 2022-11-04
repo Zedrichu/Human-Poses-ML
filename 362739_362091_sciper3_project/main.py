@@ -85,11 +85,16 @@ def main(args):
             train_labels = train_regression_target   
             search_arg_name = "dummy_arg"        
         
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
+        elif args.method_name == 'logistic regression':
+            method_obj = LogisticRegression(lr= args.lr, max_iters= args.max_iters)
+            search_arg_vals = [0.1, 0.01, 0.001, 0.0001]
+            search_arg_name = "lr"
+        
+        elif args.method_name == 'ridge regression':
+            method_obj = LinearRegression(lmda= args.ridge_regression_lmda)
+            train_labels = train_regression_target
+            search_arg_vals = [0, 0.1]
+            search_arg_name = "lmda"
 
         # cross validation (MS1)
         if args.use_cross_validation:

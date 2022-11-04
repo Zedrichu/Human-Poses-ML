@@ -2,6 +2,13 @@ import numpy as np
 
 def accuracy_fn(pred_labels, gt_labels):
     '''
+        Accuracy score
+
+        Args:
+            pred_labels: N prediction labels
+            gt_labels: N corresponding gt labels
+        Returns:
+            returns the computed accuracy
     '''
     return np.mean(pred_labels == gt_labels)*100
 
