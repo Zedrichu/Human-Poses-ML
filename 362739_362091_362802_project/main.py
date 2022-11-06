@@ -85,12 +85,12 @@ def main(args):
             train_labels = train_regression_target   
             search_arg_name = "dummy_arg"        
         
-        elif args.method_name == 'logistic regression':
+        elif args.method_name == 'logistic_regression':
             method_obj = LogisticRegression(lr= args.lr, max_iters= args.max_iters)
-            search_arg_vals = [0.1, 0.01, 0.001, 0.0001]
+            search_arg_vals = [1e-2, 1e-3, 1e-4, 5e-5, 1e-5]
             search_arg_name = "lr"
         
-        elif args.method_name == 'ridge regression':
+        elif args.method_name == 'ridge_regression':
             method_obj = LinearRegression(lmda= args.ridge_regression_lmda)
             train_labels = train_regression_target
             search_arg_vals = [0, 0.1]
@@ -98,7 +98,7 @@ def main(args):
 
         # cross validation (MS1)
         if args.use_cross_validation:
-            print("Using cross validation")
+            print("Using cross validation! \n")
             best_arg, best_val_acc = cross_validation(method_obj=method_obj, search_arg_name=search_arg_name, search_arg_vals=search_arg_vals, data=train_data, labels=train_labels, k_fold=4)
             # set the classifier/regression object to have the best hyperparameter found via cross validation:
             method_obj.set_arguments(best_arg)
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     parser.add_argument('--path_to_data', default="..", type=str, help="the path to wherever you put the data, if it's in the parent folder, you can use ..")
     parser.add_argument('--method_name', default="knn", type=str, help="knn / logistic_regression / nn")
     parser.add_argument('--knn_neighbours', default=3, type=int, help="number of knn neighbours")
-    parser.add_argument('--lr', type=float, default=1e-5, help="learning rate for methods with learning rate")
+    parser.add_argument('--lr', type=float, default=1e-4, help="learning rate for methods with learning rate")
     parser.add_argument('--ridge_regression_lmda', type=float, default=1, help="lambda for ridge regression")
     parser.add_argument('--max_iters', type=int, default=1000, help="max iters for methods which are iterative")
     parser.add_argument('--use_cross_validation', action="store_true", help="to enable cross validation")

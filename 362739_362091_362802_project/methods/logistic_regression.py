@@ -1,7 +1,8 @@
 import numpy as np
 import sys
+import time
 sys.path.append('..')
-from utils import label_to_onehot, onehot_to_label
+from utils import label_to_onehot
 
 
 class LogisticRegression(object):
@@ -27,15 +28,18 @@ class LogisticRegression(object):
             You can either pass these as args or kwargs.
         """
         
-        if "lr" in kwargs and "max_iters" in kwargs:
+        if "lr" in kwargs:
             self.lr = kwargs["lr"]
-            self.max_iters = kwargs["max_iters"]
         elif len(args) > 0:
             self.lr = args[0]
-            if len(args) > 1:
-                self.max_iters = args[1]
         else: 
-            self.lr = 0.01
+            self.lr = 1e-4
+
+        if "max_iters" in kwargs:
+            self.max_iters = kwargs["max_iters"]
+        elif len(args) > 1:
+            self.max_iters = args[1]
+        else:
             self.max_iters = 1000
 
     def f_softmax(self, data, w):
@@ -79,7 +83,7 @@ class LogisticRegression(object):
         acc = np.sum(labels_true == labels_pred) / labels_pred.shape[0] 
         return acc
 
-    def fit(self, training_data, training_labels, max_iters=100, lr=0.01):
+    def fit(self, training_data, training_labels):
         """
             Trains the model, returns predicted labels for training data.
             Arguments:
@@ -88,20 +92,37 @@ class LogisticRegression(object):
             Returns:
                 pred_labels (np.array): target of shape (N,)
         """
-        k = np.unique(training_labels).size
-        w = np.random.normal(0, 0.1, [training_data.shape[1], k])
-        for _ in range(max_iters):
-            # Compute the updated gradient
-            grad = self.gradient(training_data, label_to_onehot(training_labels), w)
-            # Update the weights
-            w -= lr * grad
+        LOG_PERIOD = 100
+        print("Started Logistic Regression training with learning rate {} and max iterations {}\n".format(self.lr, self.max_iters))
 
-            predictions = self.classify(training_data, w)
-            #check accurancy and break if 100%
-            if self.accuracy_fn(training_labels, predictions) == 1:
+        start = time.time()
+        k = np.unique(training_labels).size
+        weight = np.random.normal(0, 0.1, [training_data.shape[1], k])
+        acc = 0
+        for it in range(self.max_iters):
+            # Compute the updated gradient
+            grad = self.gradient(training_data, label_to_onehot(training_labels), weight)
+            # Update the weights
+            weight -= self.lr * grad
+
+            predictions = self.classify(training_data, weight)
+            temp = self.accuracy_fn(training_labels, predictions) 
+            # check accurancy improvement, break if no change
+            if (abs(temp-acc) < 1e-25):
                 break
-        self.W = w
-        pred_labels = self.classify(training_data, w)
+            else:
+                acc = temp
+            #check accurancy and break if 100%
+            if it % LOG_PERIOD == 0:
+                print("Training accuracy at iteration {} is {}".format(it, acc))
+            if acc == 1:
+                break
+        
+        self.W = weight
+        pred_labels = self.classify(training_data, weight)
+        print("Final accuracy after training is {}\n".format(self.accuracy_fn(training_labels, pred_labels)))
+        end = time.time()
+        print("Runtime of Logistic Regression training: {} sec\n".format(str(end-start)))
         return pred_labels
 
     def gradient(self, training_data, training_labels, W):

@@ -1,5 +1,6 @@
 import numpy as np
 from metrics import accuracy_fn, mse_fn, macrof1_fn
+import matplotlib.pyplot as plt
 
 def splitting_fn(data, labels, indices, fold_size, fold):
     """
@@ -53,6 +54,9 @@ def cross_validation(method_obj=None, search_arg_name=None, search_arg_vals=[], 
     fold_size = N//k_fold
 
     acc_list1 = []
+    plt.title("Validation metrics for each fold")
+    plt.xlabel("Number of fold")
+    plt.ylabel("Metric")
     for arg in search_arg_vals:
         arg_dict = {search_arg_name: arg}
         # this is just a way of giving an argument 
@@ -61,16 +65,22 @@ def cross_validation(method_obj=None, search_arg_name=None, search_arg_vals=[], 
 
         acc_list2 = []
         for fold in range(k_fold):
+            print("---------------------------FOLD #{}-----------------------".format(fold))
             train_data, train_label, val_data, val_label = splitting_fn(data, labels, indices, fold_size, fold) 
             method_obj.fit(train_data, train_label)
             predictions = method_obj.predict(val_data)
             acc_list2.append(metric(predictions, val_label))
+            print("\n")
         
+        plt.plot(acc_list2)
         acc_list1.append(np.mean(acc_list2))
-     
-    best_index = np.argmax(acc_list1)
+    plt.legend([x for x in search_arg_vals], title="Argument", fancybox=True)
+    plt.savefig("ValidationLoss{}.png".format(method_obj.task_kind))
+    best_index = find_param_ops(acc_list1)
     best_hyperparam = search_arg_vals[best_index]
+    print("Best hyperparameter found is -> {}".format(best_hyperparam))
     best_acc = acc_list1[best_index]
+    print("Metric for the best hyperparameter -> {}\n".format(best_acc))
 
     return best_hyperparam, best_acc
 
