@@ -32,6 +32,21 @@ class LinearRegression(object):
         else:
             self.lmda = 1
 
+    def mse_fn(self, pred, gt):
+        ''' 
+            Mean Squared Error
+            Arguments:
+                pred: NxD prediction matrix
+                gt: NxD groundtruth values for each predictions
+            Returns:
+                returns the computed loss
+
+        '''
+
+        loss = (pred-gt)**2
+        loss = np.mean(loss)
+        return loss
+
     def fit(self, training_data, training_labels):
         """
             Trains the model, returns predicted labels for training data.
@@ -41,8 +56,10 @@ class LinearRegression(object):
             Returns:
                 pred_regression_targets (np.array): predicted target of shape (N,regression_target_size)
         """
+        print("Started Ridge/Linear Regression training with lambda {}\n".format(self.lmda))
         self.w = np.linalg.inv(training_data.T @ training_data + self.lmda * np.eye(training_data.shape[1])) @ (training_data.T) @ training_labels
         pred_regression_targets = training_data @ self.w
+        print("MSE value for ridge/linear regression training {}".format(self.mse_fn(pred_regression_targets, training_labels)))
         return pred_regression_targets
 
     def predict(self, test_data):

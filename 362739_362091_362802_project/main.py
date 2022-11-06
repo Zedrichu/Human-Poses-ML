@@ -93,7 +93,7 @@ def main(args):
         elif args.method_name == 'ridge_regression':
             method_obj = LinearRegression(lmda= args.ridge_regression_lmda)
             train_labels = train_regression_target
-            search_arg_vals = [0, 0.1]
+            search_arg_vals = [0, 0.1, 1, 10, 100, 150, 500]
             search_arg_name = "lmda"
 
         # cross validation (MS1)
@@ -104,6 +104,7 @@ def main(args):
             method_obj.set_arguments(best_arg)
 
         # FIT AND PREDICT:
+        print("FIT & PREDICT phase ...")
         method_obj.fit(train_data, train_labels)
         pred_labels = method_obj.predict(test_data)
         # Report test results
@@ -125,7 +126,7 @@ if __name__ == '__main__':
     parser.add_argument('--method_name', default="knn", type=str, help="knn / logistic_regression / nn")
     parser.add_argument('--knn_neighbours', default=3, type=int, help="number of knn neighbours")
     parser.add_argument('--lr', type=float, default=1e-4, help="learning rate for methods with learning rate")
-    parser.add_argument('--ridge_regression_lmda', type=float, default=1, help="lambda for ridge regression")
+    parser.add_argument('--ridge_regression_lmda', type=float, default=150, help="lambda for ridge regression")
     parser.add_argument('--max_iters', type=int, default=1000, help="max iters for methods which are iterative")
     parser.add_argument('--use_cross_validation', action="store_true", help="to enable cross validation")
 
