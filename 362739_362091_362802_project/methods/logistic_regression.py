@@ -106,18 +106,21 @@ class LogisticRegression(object):
             weight -= self.lr * grad
 
             predictions = self.classify(training_data, weight)
-            temp = self.accuracy_fn(training_labels, predictions) 
+            acc = self.accuracy_fn(training_labels, predictions) 
             # check accurancy improvement, break if no change
-            if (abs(temp-acc) < 1e-25):
-                break
-            else:
-                acc = temp
+            # if (abs(temp-acc) < 1e-25):
+            #     break
+            # else:
+            #     acc = temp
+
             #check accurancy and break if 100%
-            if it % LOG_PERIOD == 0:
-                print("Training accuracy at iteration {} is {}".format(it, acc))
             if acc == 1:
                 break
-        
+            
+            # log training accuracy
+            if it % LOG_PERIOD == 0:
+                print("Training accuracy at iteration {} is {}".format(it, acc))
+
         self.W = weight
         pred_labels = self.classify(training_data, weight)
         print("Final accuracy after training is {}\n".format(self.accuracy_fn(training_labels, pred_labels)))
