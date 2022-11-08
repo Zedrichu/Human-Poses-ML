@@ -106,6 +106,7 @@ class LogisticRegression(object):
             weight -= self.lr * grad
 
             predictions = self.classify(training_data, weight)
+            # change for temp instead of acc, if using improvement
             acc = self.accuracy_fn(training_labels, predictions) 
             # check accurancy improvement, break if no change
             # if (abs(temp-acc) < 1e-25):
