@@ -69,6 +69,20 @@ class LogisticRegression(object):
         predictions = np.argmax(y_hat, axis=1)
         return predictions
 
+    def loss_logistic_multi(self, data, labels, w):
+        """ Loss function for multi class logistic regression
+        
+        Args:
+            data (np.array): Input data of shape (N, D)
+            labels (np.array): Labels of shape  (N, C) (in one-hot representation)
+            w (np.array): Weights of shape (D, C)
+            
+        Returns:
+            float: Loss value 
+        """
+        loss = - np.sum(labels * np.log(self.f_softmax(data,w)))
+        return loss
+
     def accuracy_fn(self, labels_true, labels_pred):
         """
         Computes accuracy of current model parameters.
@@ -106,10 +120,14 @@ class LogisticRegression(object):
             weight -= self.lr * grad
 
             predictions = self.classify(training_data, weight)
-            # change for temp instead of acc, if using improvement
-            acc = self.accuracy_fn(training_labels, predictions) 
-            # check accurancy improvement, break if no change
-            # if (abs(temp-acc) < 1e-25):
+            """
+                We commented out the following improvement in order for the project to pass all tests.
+                Change for temp instead of acc, if using improvement
+            """
+            # Compute current accuracy - keep track of previous accuracy
+            acc = self.accuracy_fn(training_labels, predictions) # change for temp
+            # check accurancy improvement, break if no significant change in the accuracy
+            # if (abs(temp-acc) <= 1e-20):
             #     break
             # else:
             #     acc = temp
@@ -121,7 +139,8 @@ class LogisticRegression(object):
             # log training accuracy
             if it % LOG_PERIOD == 0:
                 print("Training accuracy at iteration {} is {}".format(it, acc))
-
+                
+        print("Final cross-entropy loss after training: {}".format(self.loss_logistic_multi(training_data, label_to_onehot(training_labels), weight)))
         self.W = weight
         pred_labels = self.classify(training_data, weight)
         print("Final accuracy after training is {}\n".format(self.accuracy_fn(training_labels, pred_labels)))
