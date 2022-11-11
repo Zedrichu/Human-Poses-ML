@@ -126,7 +126,7 @@ class LogisticRegression(object):
             """
             # Compute current accuracy - keep track of previous accuracy
             acc = self.accuracy_fn(training_labels, predictions) # change for temp
-            # check accurancy improvement, break if no significant change in the accuracy
+            # # check accurancy improvement, break if no significant change in the accuracy
             # if (abs(temp-acc) <= 1e-20):
             #     break
             # else:
