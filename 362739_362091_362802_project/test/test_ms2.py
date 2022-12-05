@@ -37,7 +37,14 @@ class HidePrints:
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout.close()
         sys.stdout = self._original_stdout
-no_print = HidePrints  # alias
+
+class NoHidePrints:
+    """Don't disable normal printing for calling student code."""
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
 
 class TestProject(unittest.TestCase):
@@ -52,10 +59,13 @@ class TestProject(unittest.TestCase):
         self.assertTrue(project_path.exists(), f"No folder found at {project_path}")
 
         # Main files
-        for file in ["__init__.py", "data.py", "main.py", "metrics.py", "utils.py",
-                     project_path.name[:-7] + "report.pdf"]:
+        for file in ["__init__.py", "data.py", "main.py", "metrics.py", "utils.py"]:
             with self.subTest(f"Checking file {file}"):
                 self.assertTrue((project_path / file).exists(), f"No file {file} found at {project_path}")
+        with self.subTest(f"Checking report file"):
+            report_name = (project_path.absolute().name[:-7] + "report.pdf", "report.pdf")
+            self.assertTrue((project_path / report_name[0]).exists() or (project_path / report_name[1]).exists(), 
+                            f"No report found at {project_path}")
         
         # Methods
         method_path = project_path / "methods"
@@ -161,36 +171,32 @@ class TestProject(unittest.TestCase):
         self.title("Testing deep-network")
 
         # For dummy data
-        D, D_c, D_r = 10, 4, 5
+        D, C = 10, 4
         lr, epochs = 0.01, 2
 
         # Code structure
         module = importlib.import_module("methods.deep_network")
-        simple_network = module.__getattribute__("SimpleNetwork")(D, D_c, D_r)
+        simple_network = module.__getattribute__("SimpleNetwork")(D, C)
         trainer = module.__getattribute__("Trainer")(simple_network, lr, epochs)
         for fn in ["train_all", "train_one_epoch", "eval"]:
             _ = trainer.__getattribute__(fn)
         
         # Functions inputs/outputs
         N, bs = 50, 8
-        train_dataset = TensorDataset(torch.randn(N, D), torch.randn(N, D_r), torch.randint(0, D_c, (N,)))
-        val_dataset = TensorDataset(torch.randn(N, D), torch.randn(N, D_r), torch.randint(0, D_c, (N,)))
+        train_dataset = TensorDataset(torch.randn(N, D), torch.randn(N, 1), torch.randint(0, C, (N,)))
+        val_dataset = TensorDataset(torch.randn(N, D), torch.randn(N, 1), torch.randint(0, C, (N,)))
         dataloader_train = DataLoader(train_dataset, batch_size=bs, shuffle=True)
         dataloader_val = DataLoader(val_dataset, batch_size=bs, shuffle=False)
         with no_print():
             x, _, _ = next(iter(dataloader_train))
-            output_class, output_reg = simple_network(x)
+            output_class = simple_network(x)
         self.assertIsInstance(output_class, torch.Tensor, f"deep_network.SimpleNetwork.fit() should output a tensor, not {type(output_class)}")
-        self.assertEqual(output_class.shape, (bs, D_c), f"deep_network.SimpleNetwork.fit() output has wrong shape ({output_class.shape} != {(bs, D_c)})")
-        self.assertIsInstance(output_reg, torch.Tensor, f"deep_network.SimpleNetwork.fit() should output a tensor, not {type(output_reg)}")
-        self.assertEqual(output_reg.shape, (bs, D_r), f"deep_network.SimpleNetwork.fit() output has wrong shape ({output_reg.shape} != {(bs, D_r)})")
+        self.assertEqual(output_class.shape, (bs, C), f"deep_network.SimpleNetwork.fit() output has wrong shape ({output_class.shape} != {(bs, C)})")
         with no_print():
             trainer.train_all(dataloader_train, dataloader_val)
-            results_class, results_reg = trainer.eval(dataloader_val)
+            results_class = trainer.eval(dataloader_val)
         self.assertIsInstance(results_class, torch.Tensor, f"deep_network.Trainer.eval() should output a tensor, not {type(results_class)}")
         self.assertEqual(results_class.shape, (N,), f"deep_network.Trainer.eval() output has wrong shape ({results_class.shape} != {(N,)})")
-        self.assertIsInstance(results_reg, torch.Tensor, f"deep_network.Trainer.eval() should output a tensor, not {type(results_reg)}")
-        self.assertEqual(results_reg.shape, (N, D_r), f"deep_network.Trainer.eval() output has wrong shape ({results_reg.shape} != {(N, D_r)})")
 
 
 def warn(msg):
@@ -201,12 +207,19 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('-p', '--project-path', help='Path to the project folder', required=True)
+    parser.add_argument('--no-hide', action='store_true', help='Enable printing from the student code')
     args = parser.parse_args()
     
     project_path = Path(args.project_path)
 
-    if re.match(r'^((\d{6})_){3}project$', project_path.name) is None:
+    dir_name = project_path.absolute().name
+    if re.match(r'^((\d{6})_){3}project$', dir_name) is None:
         warn("Project folder name must be in the form 'XXXXXX_XXXXXX_XXXXXX_project'")
+
+    if args.no_hide:
+        no_print = NoHidePrints
+    else:
+        no_print = HidePrints
 
     sys.path.insert(0, args.project_path)
     unittest.main(argv=[''], verbosity=0)

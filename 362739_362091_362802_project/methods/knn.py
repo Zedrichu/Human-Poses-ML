@@ -29,7 +29,7 @@ class KNN(object):
         else:
             self.k = 1    
         
-    def euclidean_dist(sample, training_samples):
+    def euclidean_dist(self, sample, training_samples):
         """
             Function to compute the Euclidean distance between a single sample
             vector and all training samples.
@@ -42,14 +42,14 @@ class KNN(object):
         """
         return np.sqrt(np.sum((sample-training_samples)**2, axis = 1))
 
-    def find_k_nearest_neighbors(k, distances):
+    def find_k_nearest_neighbors(self, k, distances):
         """
             Find the indices of the k smallest distances from the list
         """
         indices = np.argsort(distances)[0:k]
         return indices
 
-    def predict_label(neighbor_labels):
+    def predict_label(self, neighbor_labels):
         """
             Return the most frequent label in the input
         """
@@ -69,10 +69,10 @@ class KNN(object):
     #     return index
 
     def kNN_sample(self, sample):
-        distances = euclidean_dist(sample, self.training_data)
-        indices = find_k_nearest_neighbors(self.k, distances)
+        distances = self.euclidean_dist(sample, self.training_data)
+        indices = self.find_k_nearest_neighbors(self.k, distances)
         neighbor_labels = self.training_labels[indices]
-        best_label = predict_label(neighbor_labels)
+        best_label = self.predict_label(neighbor_labels)
         return best_label
         
     def fit(self, training_data, training_labels):
@@ -92,7 +92,7 @@ class KNN(object):
         self.training_data = training_data
         self.training_labels = training_labels
         
-        pred_labels = [self.kNN_sample(x) for x in training_data]        
+        pred_labels = np.array([self.kNN_sample(x) for x in training_data])        
         return pred_labels
                                
     def predict(self, test_data):
@@ -104,5 +104,5 @@ class KNN(object):
             Returns:
                 test_labels (np.array): labels of shape (N,)
         """
-        test_labels = [self.kNN_sample(x) for x in test_data]
+        test_labels = np.array([self.kNN_sample(x) for x in test_data])
         return test_labels
