@@ -47,10 +47,10 @@ class PCA(object):
         self.mean = np.mean(training_data, axis=0)
         
         # Center the data with the mean
-        X_tilde = training_data / self.mean
+        X_tilde = training_data - self.mean
 
         # Create the covariance matrix
-        C = (X_tilde - self.mean).T @ (X_tilde - self.mean) * 1/training_data.shape[0] # DxN dot NxD = DxD
+        C = X_tilde.T @ X_tilde * 1/training_data.shape[0] # DxN dot NxD = DxD
         
         # Compute the eigenvectors and eigenvalues. Hint: use np.linalg.eigh
         eigvals, eigvecs = np.linalg.eigh(C) # symmetric matrix C
@@ -79,7 +79,7 @@ class PCA(object):
             Returns:
                 data_reduced (float): reduced data of shape (N,d)
         """
-        centered_data = data / self.mean
+        centered_data = data - self.mean
         data_reduced = centered_data @ self.W
         return data_reduced
         
