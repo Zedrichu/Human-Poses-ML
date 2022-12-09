@@ -12,9 +12,9 @@ class PCA(object):
             Call set_arguments function of this class.
         """
         self.set_arguments(*args, **kwargs)
-        #the mean of the training data (will be computed from the training data and saved to this variable)
+        # the mean of the training data (will be computed from the training data and saved to this variable)
         self.mean = None 
-        #the principal components (will be computed from the training data and saved to this variable)
+        # the principal components (will be computed from the training data and saved to this variable)
         self.W = None
 
     def set_arguments(self, *args, **kwargs):
@@ -23,11 +23,12 @@ class PCA(object):
             The PCA class should have a variable defining the number of dimensions (d).
             You can either pass this as an arg or a kwarg.
         """
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
+        if "d" in kwargs:
+            self.d = kwargs["d"]
+        elif len(args) > 0:
+            self.d = args[0]
+        else:
+            self.d = 1
 
     def find_principal_components(self, training_data):
         """
@@ -42,11 +43,29 @@ class PCA(object):
                 exvar (float): explained variance
         """
 
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
+        # Compute the mean of data
+        self.mean = np.mean(training_data, axis=0)
+        
+        # Center the data with the mean
+        X_tilde = training_data / self.mean
+
+        # Create the covariance matrix
+        C = (X_tilde - self.mean).T @ (X_tilde - self.mean) * 1/training_data.shape[0] # DxN dot NxD = DxD
+        
+        # Compute the eigenvectors and eigenvalues. Hint: use np.linalg.eigh
+        eigvals, eigvecs = np.linalg.eigh(C) # symmetric matrix C
+        
+        # Choose the top d eigenvalues and corresponding eigenvectors. Sort the eigenvalues( with corresponding eigenvectors )
+        # in decreasing order first.
+        idx = np.argsort(-eigvals)[:self.d] # argsort elements in decreasing order
+        # select d greatest eigenvalue indices
+
+        # Create matrix W and the corresponding eigenvalues
+        self.W = eigvecs[:, idx] # d corresponding eigenvectors
+        eg = eigvals[idx] # d greatest eigenvalues
+        
+        # Compute the explained variance
+        exvar = np.sum(eg) / np.sum(eigvals) * 100
 
         return exvar
 
@@ -60,12 +79,8 @@ class PCA(object):
             Returns:
                 data_reduced (float): reduced data of shape (N,d)
         """
-        ##
-        ###
-        #### YOUR CODE HERE! 
-        ###
-        ##
-        
+        centered_data = data / self.mean
+        data_reduced = centered_data @ self.W
         return data_reduced
         
 
