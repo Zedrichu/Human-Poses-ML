@@ -5,6 +5,11 @@ from metrics import accuracy_fn, macrof1_fn
 
 ## MS2!!
 
+def tdecode(x):
+    """
+        One-hot decoder for torch tensors
+    """
+    return torch.argmax(x, dim=1)
 
 class SimpleNetwork(nn.Module):
     """
@@ -25,9 +30,8 @@ class SimpleNetwork(nn.Module):
         Returns:
             output_class (torch.tensor): shape (N, C) (logits)
         """
-        xFlat = x
-        xFlat = F.relu(self.fc1(xFlat))
-        output_class = self.fc2(xFlat).reshape(x.shape[0], -1)
+        x = F.relu(self.fc1(x))
+        output_class = self.fc2(x)
         return output_class
 
 class Trainer(object):
@@ -70,11 +74,16 @@ class Trainer(object):
         i.e. self.model.train()
         """
         self.model.train()
+        
         for it, batch in enumerate(dataloader):
-            
+            print(type(batch))
+            # Load batch, break it down into joint and label
+            x, err, y = batch
+
+
             # Run forward pass of batch.
-            logits = self.model.forward(batch) 
-            
+            logits = self.model.forward(x) 
+
             # Compute loss (using 'criterion').
             loss = self.classification_criterion(logits, y)
             
@@ -90,7 +99,7 @@ class Trainer(object):
 
             print('\rEp {}/{}, it {}/{}: loss train: {:.2f}, accuracy train: {:.2f}'.
                   format(it + 1, self.epochs, it + 1, len(dataloader), loss,
-                         accuracy_fn(logits, y)), end='')
+                         accuracy_fn(tdecode(logits).numpy(), y.numpy())), end='')
 
     def eval(self, dataloader):
         """
@@ -109,10 +118,10 @@ class Trainer(object):
             results_class = torch.tensor([])
             for it, batch in enumerate(dataloader):
                 # Get batch of data.
-                x, y = batch
+                x, err,  y = batch
                 curr_bs = x.shape[0]
-                results_class = torch.cat((results_class, self.model(x)), axis=0)
-                acc_run += accuracy_fn(self.model(x), y) * curr_bs
+                results_class = torch.cat((results_class, tdecode(self.model(x))), axis=0)
+                acc_run += accuracy_fn(tdecode(self.model(x)).numpy(), y.numpy()) * curr_bs
             acc = acc_run / len(dataloader.dataset)
 
             print(', accuracy test: {:.2f}'.format(acc))
