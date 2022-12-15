@@ -66,7 +66,6 @@ def main(args):
         # training loop
         trainer = Trainer(model, lr=args.lr, epochs=args.max_iters)
         trainer.train_all(train_dataloader, val_dataloader)
-        print("Final evaluation metrics ==> ")
         results_class = trainer.eval(test_dataloader)
         torch.save(results_class, "results_class.txt")
     

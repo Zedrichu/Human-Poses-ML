@@ -15,11 +15,20 @@ class SimpleNetwork(nn.Module):
     """
     A network which does classification!
     """
-    def __init__(self, input_size, num_classes, hidden_size=32):
+    def __init__(self, input_size, num_classes, hidden_size=(54, 32)): #84, 32, 20 | best
         super(SimpleNetwork, self).__init__()
+        
+        # Concatenate dimensions together
+        # dimens = (input_size,) + hidden_size + (num_classes,)
+        # self.fc = []
+        # for i in range(len(dimens)-1):
+        #     self.fc.append(nn.Linear(dimens[i], dimens[i+1]))
 
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, num_classes)
+
+        self.fc1 = nn.Linear(input_size, hidden_size[0])
+        self.fc2 = nn.Linear(hidden_size[0], hidden_size[1])
+        #self.fc3 = nn.Linear(hidden_size[1], hidden_size[2])
+        self.fc3 = nn.Linear(hidden_size[1], num_classes)
 
     def forward(self, x):
         """
@@ -30,8 +39,13 @@ class SimpleNetwork(nn.Module):
         Returns:
             output_class (torch.tensor): shape (N, C) (logits)
         """
+        # for fcon in self.fc[:-1]:
+        #     x = F.relu(fcon(x))
+        
         x = F.relu(self.fc1(x))
-        output_class = self.fc2(x)
+        x = F.relu(self.fc2(x))
+        #x = F.relu(self.fc3(x))
+        output_class = self.fc3(x)
         return output_class
 
 class Trainer(object):
@@ -39,7 +53,7 @@ class Trainer(object):
     """
         Trainer class for the deep network.
     """
-
+    
     def __init__(self, model, lr, epochs, beta=100):
         """
         """
@@ -47,7 +61,7 @@ class Trainer(object):
         self.epochs = epochs
         self.model= model
         self.beta = beta
-
+        self.message = ""
         self.classification_criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.lr)
 
@@ -57,16 +71,16 @@ class Trainer(object):
         "train_one_epoch" (using dataloader_train) and "eval" (using dataloader_val).
         """
         for ep in range(self.epochs):
-            self.train_one_epoch(dataloader_train)
+            self.train_one_epoch(dataloader_train, ep)
             self.eval(dataloader_val)
 
             if (ep+1) % 50 == 0:
-                print("Reduce Learning rate")
+                print("Reduce Learning rate", end='\r')
                 for g in self.optimizer.param_groups:
                     g["lr"] = g["lr"]*0.8
 
 
-    def train_one_epoch(self, dataloader):
+    def train_one_epoch(self, dataloader, ep=0):
         """
         Method to train for ONE epoch.
         Should loop over the batches in the dataloader. (Recall the exercise session!)
@@ -76,7 +90,6 @@ class Trainer(object):
         self.model.train()
         
         for it, batch in enumerate(dataloader):
-            print(type(batch))
             # Load batch, break it down into joint and label
             x, err, y = batch
 
@@ -97,9 +110,8 @@ class Trainer(object):
             # Zero-out the accumulated gradients.
             self.optimizer.zero_grad()
 
-            print('\rEp {}/{}, it {}/{}: loss train: {:.2f}, accuracy train: {:.2f}'.
-                  format(it + 1, self.epochs, it + 1, len(dataloader), loss,
-                         accuracy_fn(tdecode(logits).numpy(), y.numpy())), end='')
+        self.message = 'Ep {}/{}: loss train: {:.2f}, accuracy train: {:.2f},'.format(
+                ep + 1, self.epochs, loss, accuracy_fn(tdecode(logits).numpy(), y.numpy()))
 
     def eval(self, dataloader):
         """
@@ -115,6 +127,7 @@ class Trainer(object):
         self.model.eval()
         with torch.no_grad():
             acc_run = 0
+            macrof1_run = 0
             results_class = torch.tensor([])
             for it, batch in enumerate(dataloader):
                 # Get batch of data.
@@ -122,8 +135,10 @@ class Trainer(object):
                 curr_bs = x.shape[0]
                 results_class = torch.cat((results_class, tdecode(self.model(x))), axis=0)
                 acc_run += accuracy_fn(tdecode(self.model(x)).numpy(), y.numpy()) * curr_bs
+                macrof1_run += macrof1_fn(tdecode(self.model(x)).numpy(), y.numpy()) * curr_bs
             acc = acc_run / len(dataloader.dataset)
+            macrof1 = macrof1_run / len(dataloader.dataset)
 
-            print(', accuracy test: {:.2f}'.format(acc))
+            print(self.message + 'accuracy test: {:.2f}, macro F1 score: {:.2f}'.format(acc, macrof1), end='\r')
         
         return results_class

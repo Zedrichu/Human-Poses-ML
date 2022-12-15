@@ -79,8 +79,8 @@ class PCA(object):
             Returns:
                 data_reduced (float): reduced data of shape (N,d)
         """
-        centered_data = data - self.mean
-        data_reduced = centered_data @ self.W
+        centered_data = data - self.mean[0:data.shape[1]]
+        data_reduced = centered_data @ self.W[0:data.shape[1]]
         return data_reduced
         
 
