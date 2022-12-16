@@ -68,6 +68,7 @@ def main(args):
         trainer.train_all(train_dataloader, val_dataloader)
         print("Final evaluation metrics ==> ")
         results_class = trainer.eval(test_dataloader)
+        print("\n")
         torch.save(results_class, "results_class.txt")
     
     # classical ML methods (MS1 and MS2)
@@ -88,13 +89,13 @@ def main(args):
         
         elif args.method_name == 'logistic_regression':
             method_obj = LogisticRegression(lr= args.lr, max_iters= args.max_iters)
-            search_arg_vals = [1e-2, 1e-3, 1e-4, 5e-5, 1e-5]
+            search_arg_vals = [1e-3, 1e-4, 5e-5, 1e-5, 1e-6]
             search_arg_name = "lr"
         
         elif args.method_name == 'ridge_regression':
             method_obj = LinearRegression(lmda= args.ridge_regression_lmda)
             train_labels = train_regression_target
-            search_arg_vals = [0, 0.1, 1, 10, 100, 150, 500]
+            search_arg_vals = [0, 0.1, 1, 10, 100, 150, 500, 1000]
             search_arg_name = "lmda"
         
         elif args.method_name == 'knn':
@@ -116,7 +117,7 @@ def main(args):
         # Report test results
         if method_obj.task_kind == 'regression':
             loss = mse_fn(pred_labels,test_regression_target)
-            print("Final loss is", loss)
+            print("Final MSE loss is", loss)
         else:
             acc = accuracy_fn(pred_labels,test_labels)
             print("Final classification accuracy is", acc)
@@ -133,7 +134,7 @@ if __name__ == '__main__':
     parser.add_argument('--knn_neighbours', default=3, type=int, help="number of knn neighbours")
     parser.add_argument('--lr', type=float, default=1e-4, help="learning rate for methods with learning rate")
     parser.add_argument('--ridge_regression_lmda', type=float, default=150, help="lambda for ridge regression")
-    parser.add_argument('--max_iters', type=int, default=1000, help="max iters for methods which are iterative")
+    parser.add_argument('--max_iters', type=int, default=500, help="max iters for methods which are iterative")
     parser.add_argument('--use_cross_validation', action="store_true", help="to enable cross validation")
 
     # Feel free to add more arguments here if you need

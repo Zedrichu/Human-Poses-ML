@@ -40,7 +40,7 @@ class LogisticRegression(object):
         elif len(args) > 1:
             self.max_iters = args[1]
         else:
-            self.max_iters = 1000
+            self.max_iters = 400
 
     def f_softmax(self, data, w):
         """ Softmax function
@@ -126,7 +126,7 @@ class LogisticRegression(object):
             """
             # Compute current accuracy - keep track of previous accuracy
             acc = self.accuracy_fn(training_labels, predictions) # change for temp
-            # # check accurancy improvement, break if no significant change in the accuracy
+            # # check accuracy improvement, break if no significant change in the accuracy
             # if (abs(temp-acc) <= 1e-20):
             #     break
             # else:

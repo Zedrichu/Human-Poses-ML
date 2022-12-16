@@ -16,20 +16,13 @@ class SimpleNetwork(nn.Module):
     """
     A network which does classification!
     """
-    def __init__(self, input_size, num_classes, hidden_size=(54, 32)): #84, 32, 20 | best
+    def __init__(self, input_size, num_classes, hidden_size=(86, 34, 18)): # 86, 34, 18 | best
         super(SimpleNetwork, self).__init__()
-        
-        # Concatenate dimensions together
-        # dimens = (input_size,) + hidden_size + (num_classes,)
-        # self.fc = []
-        # for i in range(len(dimens)-1):
-        #     self.fc.append(nn.Linear(dimens[i], dimens[i+1]))
-
 
         self.fc1 = nn.Linear(input_size, hidden_size[0])
         self.fc2 = nn.Linear(hidden_size[0], hidden_size[1])
-        #self.fc3 = nn.Linear(hidden_size[1], hidden_size[2])
-        self.fc3 = nn.Linear(hidden_size[1], num_classes)
+        self.fc3 = nn.Linear(hidden_size[1], hidden_size[2])
+        self.fc4 = nn.Linear(hidden_size[2], num_classes)
 
     def forward(self, x):
         """
@@ -45,8 +38,8 @@ class SimpleNetwork(nn.Module):
         
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        #x = F.relu(self.fc3(x))
-        output_class = self.fc3(x)
+        x = F.relu(self.fc3(x))
+        output_class = self.fc4(x)
         return output_class
 
 class Trainer(object):
@@ -72,6 +65,7 @@ class Trainer(object):
         "train_one_epoch" (using dataloader_train) and "eval" (using dataloader_val).
         """
         start = time.time()
+        print(f'Started Neural Network training with epochs:{self.epochs}, lr:{self.lr}...')
         for ep in range(self.epochs):
             self.train_one_epoch(dataloader_train, ep)
             self.eval(dataloader_val)
@@ -81,7 +75,7 @@ class Trainer(object):
                 for g in self.optimizer.param_groups:
                     g["lr"] = g["lr"]*0.8
         end = time.time()
-        print(f'Neural Network Training Runtime |> {end-start}s')
+        print(f'\nNeural Network Training Runtime |> {end-start}s')
 
 
     def train_one_epoch(self, dataloader, ep=0):
@@ -114,7 +108,7 @@ class Trainer(object):
             # Zero-out the accumulated gradients.
             self.optimizer.zero_grad()
 
-        self.message = 'Ep {}/{}: loss train: {:.2f}, accuracy train: {:.2f},'.format(
+        self.message = '--> Ep {}/{}: loss train: {:.2f}, accuracy train: {:.2f},'.format(
                 ep + 1, self.epochs, loss, accuracy_fn(tdecode(logits).numpy(), y.numpy()))
 
     def eval(self, dataloader):

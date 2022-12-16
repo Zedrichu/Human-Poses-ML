@@ -1,6 +1,7 @@
 import numpy as np
 from metrics import accuracy_fn, mse_fn, macrof1_fn
 import matplotlib.pyplot as plt
+import time
 
 def splitting_fn(data, labels, indices, fold_size, fold):
     """
