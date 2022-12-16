@@ -82,7 +82,7 @@ def cross_validation(method_obj=None, search_arg_name=None, search_arg_vals=[], 
     print("Metric for the best hyperparameter -> {}\n".format(best_acc))
 
     end = time.time()
-    print(f'Cross-Validation Runtime |> {start-end}s')
+    print(f'Cross-Validation Runtime |> {end-start}s')
 
     return best_hyperparam, best_acc
 

@@ -81,7 +81,7 @@ class Trainer(object):
                 for g in self.optimizer.param_groups:
                     g["lr"] = g["lr"]*0.8
         end = time.time()
-        print(f'Neural Network Training Runtime |> {start-end}s')
+        print(f'Neural Network Training Runtime |> {end-start}s')
 
 
     def train_one_epoch(self, dataloader, ep=0):

@@ -71,7 +71,7 @@ class PCA(object):
 
         end = time.time()
     
-        print(f'Pre-PCA Runtime |> {start-end}s')
+        print(f'Pre-PCA Runtime |> {end-start}s')
         return exvar
 
     def reduce_dimension(self, data):
@@ -88,7 +88,7 @@ class PCA(object):
         centered_data = data - self.mean[0:data.shape[1]]
         data_reduced = centered_data @ self.W[0:data.shape[1]]
         end = time.time()
-        print(f'PCA Reduction Runtime |> {start-end}s')
+        print(f'PCA Reduction Runtime |> {end-start}s')
         return data_reduced
         
 

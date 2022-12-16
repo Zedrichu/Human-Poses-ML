@@ -99,7 +99,7 @@ class KNN(object):
         pred_labels = np.array([self.kNN_sample(x) for x in training_data])        
         
         end = time.time()
-        print(f'K-Nearest Neighbors Training Runtime |> {start-end}s')
+        print(f'K-Nearest Neighbors Training Runtime |> {end-start}s')
         return pred_labels
                                
     def predict(self, test_data):

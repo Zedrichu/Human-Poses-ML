@@ -62,7 +62,7 @@ class LinearRegression(object):
         pred_regression_targets = training_data @ self.w
         print("MSE value for ridge/linear regression training {}".format(self.mse_fn(pred_regression_targets, training_labels)))
         end = time.time()
-        print(f'Ridge Regression Training Time |> {start-end}s')
+        print(f'Ridge Regression Training Time |> {end-start}s')
         return pred_regression_targets
 
     def predict(self, test_data):
