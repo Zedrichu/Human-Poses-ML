@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 class PCA(object):
     """
@@ -42,6 +43,7 @@ class PCA(object):
             Returns:
                 exvar (float): explained variance
         """
+        start = time.time()
 
         # Compute the mean of data
         self.mean = np.mean(training_data, axis=0)
@@ -67,6 +69,9 @@ class PCA(object):
         # Compute the explained variance
         exvar = np.sum(eg) / np.sum(eigvals) * 100
 
+        end = time.time()
+    
+        print(f'Pre-PCA Runtime |> {start-end}s')
         return exvar
 
     def reduce_dimension(self, data):
@@ -79,8 +84,11 @@ class PCA(object):
             Returns:
                 data_reduced (float): reduced data of shape (N,d)
         """
+        start = time.time()
         centered_data = data - self.mean[0:data.shape[1]]
         data_reduced = centered_data @ self.W[0:data.shape[1]]
+        end = time.time()
+        print(f'PCA Reduction Runtime |> {start-end}s')
         return data_reduced
         
 

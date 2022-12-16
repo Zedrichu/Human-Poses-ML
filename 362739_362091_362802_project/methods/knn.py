@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 class KNN(object):
     """
@@ -90,11 +91,15 @@ class KNN(object):
                 pred_labels (np.array): labels of shape (N,)
         """
         print(f'Started KNN training with hyperparameter k={self.k}...')
+        start = time.time()
 
         self.training_data = training_data
         self.training_labels = training_labels
         
         pred_labels = np.array([self.kNN_sample(x) for x in training_data])        
+        
+        end = time.time()
+        print(f'K-Nearest Neighbors Training Runtime |> {start-end}s')
         return pred_labels
                                
     def predict(self, test_data):

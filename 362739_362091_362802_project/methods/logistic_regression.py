@@ -145,7 +145,7 @@ class LogisticRegression(object):
         pred_labels = self.classify(training_data, weight)
         print("Final accuracy after training is {}\n".format(self.accuracy_fn(training_labels, pred_labels)))
         end = time.time()
-        print("Runtime of Logistic Regression training: {} sec\n".format(str(end-start)))
+        print(f'Logistic Regression Training |> {start-end}s')
         return pred_labels
 
     def gradient(self, training_data, training_labels, W):

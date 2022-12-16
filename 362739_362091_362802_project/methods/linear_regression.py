@@ -1,5 +1,5 @@
 import numpy as np
-import sys
+import time
 
 class LinearRegression(object):
     """
@@ -57,9 +57,12 @@ class LinearRegression(object):
                 pred_regression_targets (np.array): predicted target of shape (N,regression_target_size)
         """
         print("Started Ridge/Linear Regression training with lambda {}\n".format(self.lmda))
+        start = time.time()
         self.w = np.linalg.inv(training_data.T @ training_data + self.lmda * np.eye(training_data.shape[1])) @ (training_data.T) @ training_labels
         pred_regression_targets = training_data @ self.w
         print("MSE value for ridge/linear regression training {}".format(self.mse_fn(pred_regression_targets, training_labels)))
+        end = time.time()
+        print(f'Ridge Regression Training Time |> {start-end}s')
         return pred_regression_targets
 
     def predict(self, test_data):

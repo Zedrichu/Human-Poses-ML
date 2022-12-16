@@ -45,6 +45,7 @@ def cross_validation(method_obj=None, search_arg_name=None, search_arg_vals=[], 
     """
     ## choose the metric and operation to find best params based on the metric depending upon the
     ## kind of task.
+    start = time.time()
     metric = mse_fn if method_obj.task_kind == 'regression' else macrof1_fn
     find_param_ops = np.argmin if method_obj.task_kind == 'regression' else np.argmax
 
@@ -79,6 +80,9 @@ def cross_validation(method_obj=None, search_arg_name=None, search_arg_vals=[], 
     print("Best hyperparameter found is -> {}".format(best_hyperparam))
     best_acc = acc_list1[best_index]
     print("Metric for the best hyperparameter -> {}\n".format(best_acc))
+
+    end = time.time()
+    print(f'Cross-Validation Runtime |> {start-end}s')
 
     return best_hyperparam, best_acc
 

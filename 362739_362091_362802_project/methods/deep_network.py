@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from metrics import accuracy_fn, macrof1_fn
+import time
 
 ## MS2!!
 
@@ -70,6 +71,7 @@ class Trainer(object):
         Method to iterate over the epochs. In each epoch, it should call the functions
         "train_one_epoch" (using dataloader_train) and "eval" (using dataloader_val).
         """
+        start = time.time()
         for ep in range(self.epochs):
             self.train_one_epoch(dataloader_train, ep)
             self.eval(dataloader_val)
@@ -78,6 +80,8 @@ class Trainer(object):
                 print("Reduce Learning rate", end='\r')
                 for g in self.optimizer.param_groups:
                     g["lr"] = g["lr"]*0.8
+        end = time.time()
+        print(f'Neural Network Training Runtime |> {start-end}s')
 
 
     def train_one_epoch(self, dataloader, ep=0):
