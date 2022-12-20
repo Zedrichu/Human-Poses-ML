@@ -19,7 +19,7 @@ def main(args):
     # First we create all of our dataset objects. The dataset objects store the data, labels (for classification) and the targets for regression
     if args.dataset=="h36m":
         train_dataset = H36M_Dataset(split="train", path_to_data=args.path_to_data)
-        test_dataset = H36M_Dataset(split="test", path_to_data=args.path_to_data, means=train_dataset.means, stds=train_dataset.stds)
+        test_dataset = H36M_Dataset(split="test2", path_to_data=args.path_to_data, means=train_dataset.means, stds=train_dataset.stds)
         #uncomment for MS2
         val_dataset = H36M_Dataset(split="val",path_to_data=args.path_to_data, means=train_dataset.means, stds=train_dataset.stds)
 
@@ -69,7 +69,7 @@ def main(args):
         print("Final evaluation metrics ==> ")
         results_class = trainer.eval(test_dataloader)
         print("\n")
-        torch.save(results_class, "results_class.txt")
+        np.save("results_class", results_class.numpy())
     
     # classical ML methods (MS1 and MS2)
     # we first create the classification/regression objects

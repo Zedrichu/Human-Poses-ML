@@ -16,10 +16,14 @@ class SimpleNetwork(nn.Module):
     """
     A network which does classification!
     """
-    def __init__(self, input_size, num_classes, hidden_size=(86, 34, 18)): # 86, 34, 18 | best
+    def __init__(self, input_size, num_classes, hidden_size=(120, 68, 36), conv_size=(6, 24)): 
+        # best setup yet: convolution <|6, 24|> hidden <|120, 68, 36|> 
+        # lr: 1e-4 epochs: 50 dropout: 0.6 conv_kernel:5 pool_kernel:2
         super(SimpleNetwork, self).__init__()
-
-        self.fc1 = nn.Linear(input_size, hidden_size[0])
+        self.conv1 = nn.Conv1d(1, conv_size[0], kernel_size=5, padding=2)
+        self.conv2 = nn.Conv1d(conv_size[0], conv_size[1], kernel_size=5, padding=2)
+        self.drop = nn.Dropout1d(p=0.6)
+        self.fc1 = nn.Linear(conv_size[1] * (input_size // 4), hidden_size[0])
         self.fc2 = nn.Linear(hidden_size[0], hidden_size[1])
         self.fc3 = nn.Linear(hidden_size[1], hidden_size[2])
         self.fc4 = nn.Linear(hidden_size[2], num_classes)
@@ -33,12 +37,15 @@ class SimpleNetwork(nn.Module):
         Returns:
             output_class (torch.tensor): shape (N, C) (logits)
         """
-        # for fcon in self.fc[:-1]:
-        #     x = F.relu(fcon(x))
-        
-        x = F.relu(self.fc1(x))
+        x = x.reshape(x.shape[0], 1, x.shape[1])
+        x = F.max_pool1d(F.relu(self.conv1(x)), kernel_size=2)
+        x = F.max_pool1d(F.relu(self.conv2(x)), kernel_size=2)
+        # Flatten after convolutions and pooling over last 2 dimensions (channels, signal)
+        x = self.drop(x).reshape(x.shape[0], -1)
+        x = F.relu(self.fc1(x)) #gelu or relu
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc3(x)) 
+        # potentially F.softmax for last layer
         output_class = self.fc4(x)
         return output_class
 
@@ -57,7 +64,9 @@ class Trainer(object):
         self.beta = beta
         self.message = ""
         self.classification_criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.lr)
+        #self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.lr)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        # SGD - around 300 iterations, lr: 1e-3 <> ADAM - around 60 iterations
 
     def train_all(self, dataloader_train, dataloader_val):
         """
@@ -73,8 +82,8 @@ class Trainer(object):
             if (ep+1) % 50 == 0:
                 print("Reduce Learning rate", end='\r')
                 for g in self.optimizer.param_groups:
-                    g["lr"] = g["lr"]*0.8
-        end = time.time()
+                    g["lr"] = g["lr"]*1 # 1 for ADAM, 0.8 otherwise
+        end = time.time() 
         print(f'\nNeural Network Training Runtime |> {end-start}s')
 
 
