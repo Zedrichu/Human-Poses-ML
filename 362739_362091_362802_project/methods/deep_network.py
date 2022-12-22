@@ -16,9 +16,9 @@ class SimpleNetwork(nn.Module):
     """
     A network which does classification!
     """
-    def __init__(self, input_size, num_classes, hidden_size=(120, 68, 36), conv_size=(6, 24)): 
-        # best setup yet: convolution <|6, 24|> hidden <|120, 68, 36|> 
-        # lr: 1e-4 epochs: 50 dropout: 0.6 conv_kernel:5 pool_kernel:2
+    def __init__(self, input_size, num_classes, hidden_size=(120, 68, 36), conv_size=(8, 24)): 
+        # best setup yet: convolution <|8, 24|> hidden <|120, 68, 36|> 
+        # lr: 5e-5 epochs: 30 dropout: 0.6 conv_kernel:5 pool_kernel:2
         super(SimpleNetwork, self).__init__()
         self.conv1 = nn.Conv1d(1, conv_size[0], kernel_size=5, padding=2)
         self.conv2 = nn.Conv1d(conv_size[0], conv_size[1], kernel_size=5, padding=2)
@@ -83,6 +83,7 @@ class Trainer(object):
                 print("Reduce Learning rate", end='\r')
                 for g in self.optimizer.param_groups:
                     g["lr"] = g["lr"]*1 # 1 for ADAM, 0.8 otherwise
+                    
         end = time.time() 
         print(f'\nNeural Network Training Runtime |> {end-start}s')
 
