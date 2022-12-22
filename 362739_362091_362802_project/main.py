@@ -20,11 +20,6 @@ def main(args):
     if args.dataset=="h36m":
         train_dataset = H36M_Dataset(split="train", path_to_data=args.path_to_data)
         test_dataset = H36M_Dataset(split="test", path_to_data=args.path_to_data, means=train_dataset.means, stds=train_dataset.stds)
-        
-        # ----
-        test2_dataset = H36M_Dataset(split="test2", path_to_data=args.path_to_data, means=train_dataset.means, stds=train_dataset.stds)
-        # ----
-
         #uncomment for MS2
         val_dataset = H36M_Dataset(split="val",path_to_data=args.path_to_data, means=train_dataset.means, stds=train_dataset.stds)
 
@@ -64,21 +59,16 @@ def main(args):
         train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
         val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False)
         test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-        # ----
-        test2_dataloader = DataLoader(test2_dataset, batch_size=32, shuffle=False)
-        # ----
+        
         # create model
         model = SimpleNetwork(input_size=train_dataset.feature_dim, num_classes=train_dataset.num_classes)
         
         # training loop
         trainer = Trainer(model, lr=args.lr, epochs=args.max_iters)
-        trainer.train_all(train_dataloader, val_dataloader, test_dataloader)
+        trainer.train_all(train_dataloader, val_dataloader)
         print("Final evaluation metrics ==> ")
-        trainer.eval(test_dataloader)
-        # ----
-        print("Test2:")
-        results_class = trainer.eval(test2_dataloader)
-        # ----
+        results_class = trainer.eval(test_dataloader)
+        
         print("\n")
         np.save("results_class", results_class.numpy())
     
