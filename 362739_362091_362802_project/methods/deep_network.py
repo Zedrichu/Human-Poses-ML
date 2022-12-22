@@ -16,13 +16,13 @@ class SimpleNetwork(nn.Module):
     """
     A network which does classification!
     """
-    def __init__(self, input_size, num_classes, hidden_size=(120, 68, 36), conv_size=(8, 24)): 
+    def __init__(self, input_size, num_classes, hidden_size=(120, 68, 36), conv_size=(10, 24)): 
         # best setup yet: convolution <|8, 24|> hidden <|120, 68, 36|> 
         # lr: 5e-5 epochs: 30 dropout: 0.6 conv_kernel:5 pool_kernel:2
         super(SimpleNetwork, self).__init__()
         self.conv1 = nn.Conv1d(1, conv_size[0], kernel_size=5, padding=2)
         self.conv2 = nn.Conv1d(conv_size[0], conv_size[1], kernel_size=5, padding=2)
-        self.drop = nn.Dropout1d(p=0.6)
+        self.drop = nn.Dropout1d(p=0.5)
         self.fc1 = nn.Linear(conv_size[1] * (input_size // 4), hidden_size[0])
         self.fc2 = nn.Linear(hidden_size[0], hidden_size[1])
         self.fc3 = nn.Linear(hidden_size[1], hidden_size[2])
@@ -60,6 +60,9 @@ class Trainer(object):
         """
         self.lr = lr
         self.epochs = epochs
+        #
+        self.found = False
+        #
         self.model= model
         self.beta = beta
         self.message = ""
@@ -68,7 +71,7 @@ class Trainer(object):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         # SGD - around 300 iterations, lr: 1e-3 <> ADAM - around 60 iterations
 
-    def train_all(self, dataloader_train, dataloader_val):
+    def train_all(self, dataloader_train, dataloader_val, dataloader_test):
         """
         Method to iterate over the epochs. In each epoch, it should call the functions
         "train_one_epoch" (using dataloader_train) and "eval" (using dataloader_val).
@@ -76,13 +79,19 @@ class Trainer(object):
         start = time.time()
         print(f'Started Neural Network training with epochs:{self.epochs}, lr:{self.lr}...')
         for ep in range(self.epochs):
+            if self.found:
+                break
             self.train_one_epoch(dataloader_train, ep)
             self.eval(dataloader_val)
+            
+            #----
+            self.eval(dataloader_test)
+            #----
 
             if (ep+1) % 50 == 0:
                 print("Reduce Learning rate", end='\r')
                 for g in self.optimizer.param_groups:
-                    g["lr"] = g["lr"]*1 # 1 for ADAM, 0.8 otherwise
+                    g["lr"] = g["lr"]*0.8
                     
         end = time.time() 
         print(f'\nNeural Network Training Runtime |> {end-start}s')
@@ -144,9 +153,12 @@ class Trainer(object):
                 results_class = torch.cat((results_class, tdecode(self.model(x))), axis=0)
                 acc_run += accuracy_fn(tdecode(self.model(x)).numpy(), y.numpy()) * curr_bs
                 macrof1_run += macrof1_fn(tdecode(self.model(x)).numpy(), y.numpy()) * curr_bs
+            
             acc = acc_run / len(dataloader.dataset)
             macrof1 = macrof1_run / len(dataloader.dataset)
+            if (acc>=95.2):
+                self.found = True
 
-            print(self.message + 'accuracy test: {:.2f}, macro F1 score: {:.2f}'.format(acc, macrof1), end='\r')
+            print(self.message + 'accuracy: {:.2f}, macro F1 score: {:.2f}'.format(acc, macrof1), end='\r')
         
         return results_class
